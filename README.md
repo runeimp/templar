@@ -9,7 +9,7 @@ Usage
 
 ```bash
 $ templar
-Templar v1.0.1
+Templar v1.0.2
 License(s): http://opensource.org/licenses/MIT
 
 Command line tool to parse a file with ${VAR} style references with their
@@ -18,12 +18,13 @@ environment variable or .env type file counterparts.
 templar [OPTIONS] ...
 
 OPTIONS:
-  -f | -file | --env-file     Use the specified file to populate the
-                              template environment.
-  -h | -help | --help         Display this help info.
-  -n | -dot  | --no-dotenv    Do not automatically load a local .env file.
-  -o | -out  | --output-file  Output to the specified file.
-  -v | -ver  | --version      Display app version info.
+  -d | -debug | --debug        Show debug info on stderr
+  -f | -file  | --env-file     Use the specified file to populate the
+                               template environment.
+  -h | -help  | --help         Display this help info.
+  -n | -dot   | --no-dotenv    Do not automatically load a local .env file.
+  -o | -out   | --output-file  Output to the specified file.
+  -v | -ver   | --version      Display app version info.
 
 ```
 

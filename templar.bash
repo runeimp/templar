@@ -7,6 +7,7 @@
 #####
 # ChangeLog:
 # ----------
+# 2018-12-12_02:06  v1.0.2      Cleaned up help and updated README.md
 # 2018-12-12_02:00  v1.0.1      Updated help with debug reference
 # 2018-12-11_19:57  v1.0.0      Initial script creation
 #
@@ -24,7 +25,7 @@ DESC
 )
 APP_LICENSES="http://opensource.org/licenses/MIT"
 APP_NAME="Templar"
-APP_VERSION="1.0.1"
+APP_VERSION="1.0.2"
 CLI_NAME="templar"
 
 
@@ -123,13 +124,13 @@ show_help()
 	$CLI_NAME [OPTIONS] ...
 
 	OPTIONS:
-	  -d | -debug | --debug       Show debug info on stderr
-	  -f | -file | --env-file     Use the specified file to populate the
-	                              template environment.
-	  -h | -help | --help         Display this help info.
-	  -n | -dot  | --no-dotenv    Do not automatically load a local .env file.
-	  -o | -out  | --output-file  Output to the specified file.
-	  -v | -ver  | --version      Display app version info.
+	  -d | -debug | --debug        Show debug info on stderr
+	  -f | -file  | --env-file     Use the specified file to populate the
+	                               template environment.
+	  -h | -help  | --help         Display this help info.
+	  -n | -dot   | --no-dotenv    Do not automatically load a local .env file.
+	  -o | -out   | --output-file  Output to the specified file.
+	  -v | -ver   | --version      Display app version info.
 
 EOH
 }
