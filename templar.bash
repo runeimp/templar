@@ -7,6 +7,7 @@
 #####
 # ChangeLog:
 # ----------
+# 2018-12-12_02:00  v1.0.1      Updated help with debug reference
 # 2018-12-11_19:57  v1.0.0      Initial script creation
 #
 #
@@ -23,7 +24,7 @@ DESC
 )
 APP_LICENSES="http://opensource.org/licenses/MIT"
 APP_NAME="Templar"
-APP_VERSION="1.0.0"
+APP_VERSION="1.0.1"
 CLI_NAME="templar"
 
 
@@ -122,6 +123,7 @@ show_help()
 	$CLI_NAME [OPTIONS] ...
 
 	OPTIONS:
+	  -d | -debug | --debug       Show debug info on stderr
 	  -f | -file | --env-file     Use the specified file to populate the
 	                              template environment.
 	  -h | -help | --help         Display this help info.
