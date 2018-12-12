@@ -9,7 +9,7 @@ Usage
 
 ```bash
 $ templar
-Templar v1.0.0
+Templar v1.0.1
 License(s): http://opensource.org/licenses/MIT
 
 Command line tool to parse a file with ${VAR} style references with their
