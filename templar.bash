@@ -7,6 +7,7 @@
 #####
 # ChangeLog:
 # ----------
+# 2019-01-02_18:00  v1.1.0      Added template option, updated env file priorities and docs
 # 2018-12-12_02:06  v1.0.2      Cleaned up help and updated README.md
 # 2018-12-12_02:00  v1.0.1      Updated help with debug reference
 # 2018-12-11_19:57  v1.0.0      Initial script creation
@@ -25,7 +26,7 @@ DESC
 )
 APP_LICENSES="http://opensource.org/licenses/MIT"
 APP_NAME="Templar"
-APP_VERSION="1.0.2"
+APP_VERSION="1.1.0"
 CLI_NAME="templar"
 
 
@@ -45,6 +46,7 @@ declare -a VARS
 declare -i debug_output=1 # boolean
 declare -i no_env=1 # boolean
 declare output_file=''
+declare template=''
 
 
 #
@@ -63,6 +65,7 @@ debug()
 
 export_cli_vars()
 {
+	# echo "export_cli_vars():" "${VARS[@]} (${#VARS[@]})"
 	for env in "${VARS[@]}"; do
 		debug "CLI env:" "$env"
 		export "$env"
@@ -72,26 +75,42 @@ export_cli_vars()
 export_file_vars()
 {
 	local line=""
-	local quote_re='^(.+)="(.+)"'
+	local quote_re='^(.+)=(['"'"'"])(.+)(['"'"'"])'
 
 	debug "FILES:" "\${ENV_FILES[@]} = ${ENV_FILES[@]}"
 	for env in ${ENV_FILES[@]}; do
-		debug "FILE env:" "$env"
+		debug "FILE  env:" "$env"
 
 		while read -r line || [ -n "$line" ]; do
 			if [[ ${line:0:1} != '#' ]]; then
-				debug "FILE line:" "$line"
+				debug "FILE line:" "$line (original)"
+				# debug "FILE quote_re:" "$quote_re"
 				if [[ $line =~ $quote_re ]]; then
-					debug "FILE line:" "\${BASH_REMATCH[0]} = ${BASH_REMATCH[0]}"
-					debug "FILE line:" "\${BASH_REMATCH[1]} = ${BASH_REMATCH[1]}"
-					debug "FILE line:" "\${BASH_REMATCH[2]} = ${BASH_REMATCH[2]}"
-					line="${BASH_REMATCH[1]}=${BASH_REMATCH[2]}"
-					debug "FILE line:" "$line"
+					# debug "FILE line:" "\${BASH_REMATCH[0]} = ${BASH_REMATCH[0]}"
+					# if [[ ${#BASH_REMATCH[1]} -gt 0 ]]; then
+					# 	debug "FILE line:" "\${BASH_REMATCH[1]} = '${BASH_REMATCH[1]}'"
+					# fi
+					# if [[ ${#BASH_REMATCH[2]} -gt 0 ]]; then
+					# 	debug "FILE line:" "\${BASH_REMATCH[2]} = '${BASH_REMATCH[2]}'"
+					# fi
+					# if [[ ${#BASH_REMATCH[3]} -gt 0 ]]; then
+					# 	debug "FILE line:" "\${BASH_REMATCH[3]} = '${BASH_REMATCH[3]}'"
+					# fi
+					# if [[ ${#BASH_REMATCH[4]} -gt 0 ]]; then
+					# 	debug "FILE line:" "\${BASH_REMATCH[4]} = '${BASH_REMATCH[4]}'"
+					# fi
+					# if [[ ${#BASH_REMATCH[5]} -gt 0 ]]; then
+					# 	debug "FILE line:" "\${BASH_REMATCH[5]} = '${BASH_REMATCH[5]}'"
+					# fi
+					line="${BASH_REMATCH[1]}=${BASH_REMATCH[3]}"
+					debug "FILE line:" "$line (parsed)"
 				fi
 				export "$line"
 			fi
 		done < $env
 	done
+
+	# cut -d= -f1
 }
 
 renderer()
@@ -121,16 +140,25 @@ show_help()
 
 	$APP_DESC
 
-	$CLI_NAME [OPTIONS] ...
+	$CLI_NAME [OPTIONS] TEMPLATE_FILE
 
 	OPTIONS:
-	  -d | -debug | --debug        Show debug info on stderr
-	  -f | -file  | --env-file     Use the specified file to populate the
-	                               template environment.
-	  -h | -help  | --help         Display this help info.
-	  -n | -dot   | --no-dotenv    Do not automatically load a local .env file.
-	  -o | -out   | --output-file  Output to the specified file.
-	  -v | -ver   | --version      Display app version info.
+	  -d | -debug | --debug      Show debug info on stderr
+	  -f | -file  | --env-file ENV_FILE
+	      Use the specified ENV_FILE to populate the template environment.
+	      Can be used more than once. Variables in files specified later on
+	      the command line take higher priority.
+	  -h | -help  | --help       Display this help info.
+	  -n | -dot   | --no-dotenv  Do not load a local .env file.
+	  -o | -out   | --output-file OUTPUT_FILE
+	      Output to the specified file.
+	  -t | -temp | --template TEMPLATE_FILE
+	      Specify the template file to render.
+	  -v | -ver   | --version    Display app version info.
+
+	NOTE:
+	Options may appear anywhere on the command line before or/and after the named
+	template file.
 
 EOH
 }
@@ -186,12 +214,16 @@ else
 			output_file="$2"
 			shift
 			;;
+		-t | -temp | --template)
+			template="$2"
+			shift
+			;;
 		-v | -ver | --version)
 			echo "$APP_LABEL"
 			exit 0
 			;;
 		*=*)
-			VARS=( ${VARS[@]} "$1" )
+			VARS=( "${VARS[@]}" "$1" )
 			;;
 		*)
 			ARGS=( ${ARGS[@]} "$1" )
@@ -207,10 +239,10 @@ fi
 # MAIN ENTRYPOINT
 #
 
-if [[ ${#ARGS[@]} -gt 0 ]]; then
+if [[ ${#template} -gt 0 ]] || [[ ${#ARGS[@]} -gt 0 ]]; then
 	if [[ $no_env -ne 0 ]] && [[ -e ".env" ]]; then
 		if [[ -r ".env" ]]; then
-			ENV_FILES=( ${ENV_FILES[@]} ".env" )
+			ENV_FILES=( ".env" ${ENV_FILES[@]} )
 		else
 			echo ".env found but not readable."
 		fi
@@ -218,7 +250,9 @@ if [[ ${#ARGS[@]} -gt 0 ]]; then
 
 	export_file_vars
 	export_cli_vars
-	cat "${ARGS[0]}" | renderer
+	if [[ ${#template} -eq 0 ]] && [[ ${#ARGS[@]} -gt 0 ]]; then
+		template="${ARGS[0]}"
+	fi
+	cat "$template" | renderer
 fi
-
 
