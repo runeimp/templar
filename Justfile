@@ -1,5 +1,11 @@
+#
+# This is a Justfile for https://github.com/casey/just and is much like a Makefile for make
+# I highly recommend using just for basic automation.
+#
 
-
+# Like in make the first recipe is used by default.
+# I like listing all the recipes by default.
+# I also like wiping the terminal buffer like CLS in DOS. It makes me happy.  :-)
 @_default:
 	just _term-wipe
 	just --list
