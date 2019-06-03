@@ -2,4 +2,8 @@ module github.com/runeimp/templar
 
 go 1.12
 
-require github.com/alexflint/go-arg v1.0.0
+require (
+	github.com/alecthomas/kong v0.1.16
+	github.com/cbroglie/mustache v1.0.1
+	github.com/spf13/cobra v0.0.4 // indirect
+)
