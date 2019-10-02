@@ -53,7 +53,7 @@ var cli struct {
 	DataJSON   []string `short:"j" help:"Use the specified JSON_FILE (regardless of it's file extension) to populate the template environment." placeholder:"JSON_FILE" type:"existingfile"`
 	Debug      bool     `help:"Show debug info on stderr." hidden`
 	NoDotenv   bool     `short:"n" help:"Do not load a local .env file if present."`
-	OutputFile string   `short:"o" help:"Output to the specified file." placeholder:"FILE" sep:' ' type:"existingfile"`
+	OutputFile string   `short:"o" help:"Output to the specified file." placeholder:"FILE" sep:' ' type:"file"`
 	Template   string   `arg optional help:"Specify the template file to render." type:"existingfile"`
 	// ____       string `arg:"-_" help:"____"`
 	// ____       string `arg:"-_" help:"____"`
@@ -153,12 +153,20 @@ func main() {
 		os.Exit(ErrorJSONParsing)
 	}
 
-	output, err := templar.Render(cli.Template)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "Template Rendering Error: %s\n", err.Error())
-		os.Exit(ErrorTemplateRendering)
+	if len(cli.OutputFile) > 0 {
+		_, err := templar.RenderFile(cli.OutputFile, cli.Template)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Template Rendering Error: %s\n", err.Error())
+			os.Exit(ErrorTemplateRendering)
+		}
+	} else {
+		output, err := templar.Render(cli.Template)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Template Rendering Error: %s\n", err.Error())
+			os.Exit(ErrorTemplateRendering)
+		}
+		fmt.Printf("%s", output)
 	}
-	fmt.Printf("%s", output)
 	kong.UsageOnError()
 	// kong.Help(kong.DefaultHelpPrinter(kong.HelpOptions, ctx))
 }

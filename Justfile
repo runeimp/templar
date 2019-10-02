@@ -23,7 +23,7 @@ test-debug +data="example.env":
 
 # Test the help system
 test-help +data="example.env":
-	go run cmd/templar/main.go --help; exit 0
+	go run cmd/templar/main.go --help
 
 # Test example.env with .env
 test-stdout +data="example.json -f example2.json":

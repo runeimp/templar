@@ -142,6 +142,15 @@ func Render(template string) (output string, err error) {
 	return output, err
 }
 
+func RenderFile(filename, template string) (output string, err error) {
+	output, err = mustache.RenderFile(template, dataProvider)
+	if err != nil {
+		return output, err
+	}
+	err = ioutil.WriteFile(filename, []byte(output), 0644)
+	return output, err
+}
+
 // Test Mustache template system
 // func Test() {
 // 	tmpl, _ := mustache.ParseString("Hello, {{c}}!\n")

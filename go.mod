@@ -9,3 +9,5 @@ require (
 	github.com/subosito/gotenv v1.2.0
 	gopkg.in/ini.v1 v1.48.0
 )
+
+replace github.com/alecthomas/kong => /Users/runeimp/dev/lang/go/runeimp/src/github.com/runeimp/kong
