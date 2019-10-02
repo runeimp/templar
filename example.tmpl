@@ -1,7 +1,10 @@
-Hello ${USER}!
-How do you like it in "${PWD}"?
+Hello {{USER}}!
+How do you like it in "{{PWD}}"?
 
-ENV_FILE_COMMENT == '${ENV_FILE_COMMENT}'
-    ENV_FILE_VAR == '${ENV_FILE_VAR}'
-     CLI_ENV_VAR == '${CLI_ENV_VAR}'
-         CLI_VAR == '${CLI_VAR}'
+ENV_FILE_COMMENT == '{{ENV_FILE_COMMENT}}'
+    ENV_FILE_VAR == '{{ENV_FILE_VAR}}'
+     CLI_ENV_VAR == '{{CLI_ENV_VAR}}'
+         CLI_VAR == '{{CLI_VAR}}'
+         boolean == {{boolean}}
+   one.two.three == {{one.two.three}}
+             all =={{# all}} {{.}}{{/ all}}

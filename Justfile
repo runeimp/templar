@@ -12,30 +12,43 @@
 
 
 # Run a test
-@test cmd="help":
+@test cmd="help" +data="":
 	just _term-wipe
-	just test-{{cmd}}
+	just test-{{cmd}} "{{data}}"
 
 # Test with debug enabled
-test-debug:
-	CLI_ENV_VAR="Sound and fury" go run cmd/templar/main.go example.tmpl -file example.env CLI_VAR="As you like it" --debug
+test-debug +data="example.env":
+	@# CLI_ENV_VAR="Sound and fury" go run cmd/templar/main.go example.tmpl --data-file example.env CLI_VAR="As you like it" --debug
+	CLI_ENV_VAR="Sound and fury" CLI_VAR="As you like it" go run cmd/templar/main.go example.tmpl --data-file {{data}} --debug
 
 # Test the help system
-test-help:
+test-help +data="example.env":
 	go run cmd/templar/main.go --help
 
 # Test example.env with .env
-test-stdout:
-	CLI_ENV_VAR="Sound and fury" go run cmd/templar/main.go example.tmpl -file example.env CLI_VAR="As you like it"
+test-stdout +data="example.json -f example2.json":
+	@# CLI_ENV_VAR="Sound and fury" go run cmd/templar/main.go example.tmpl --data-file example.env CLI_VAR="As you like it"
+	CLI_ENV_VAR="Sound and fury" CLI_VAR="As you like it" go run cmd/templar/main.go example.tmpl --data-file {{data}}
 
 # Test example.env with out .env
-test-no-dotenv:
-	CLI_ENV_VAR="Sound and fury" go run cmd/templar/main.go example.tmpl -file example.env CLI_VAR="As you like it" --no-dotenv
+test-no-dotenv +data="example.env":
+	#!/bin/sh
+	if [ -z "{{data}}" ]; then
+		echo 'CLI_ENV_VAR="Sound and fury" CLI_VAR="As you like it" go run cmd/templar/main.go example.tmpl --no-dotenv'
+		CLI_ENV_VAR="Sound and fury" CLI_VAR="As you like it" go run cmd/templar/main.go example.tmpl --no-dotenv
+	else
+		echo 'CLI_ENV_VAR="Sound and fury" CLI_VAR="As you like it" go run cmd/templar/main.go example.tmpl --data-file {{data}} --no-dotenv'
+		CLI_ENV_VAR="Sound and fury" CLI_VAR="As you like it" go run cmd/templar/main.go example.tmpl --data-file {{data}} --no-dotenv
+	fi
+
+	# CLI_ENV_VAR="Sound and fury" go run cmd/templar/main.go example.tmpl --data-file example.env CLI_VAR="As you like it" --no-dotenv
+	
 
 # Test creating an output file
-test-with-file:
+test-with-file +data="example.env":
 	rm output.txt
-	CLI_ENV_VAR="Sound and fury" go run cmd/templar/main.go --output-file output.txt example.tmpl --env-file example.env CLI_VAR="As you like it"
+	@# CLI_ENV_VAR="Sound and fury" go run cmd/templar/main.go --output-file output.txt example.tmpl --env-file example.env CLI_VAR="As you like it"
+	CLI_ENV_VAR="Sound and fury" CLI_VAR="As you like it" go run cmd/templar/main.go --output-file output.txt example.tmpl --env-file {{data}}
 	cat output.txt
 
 

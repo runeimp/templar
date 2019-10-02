@@ -5,5 +5,5 @@ go 1.12
 require (
 	github.com/alecthomas/kong v0.1.16
 	github.com/cbroglie/mustache v1.0.1
-	github.com/spf13/cobra v0.0.4 // indirect
+	github.com/subosito/gotenv v1.2.0
 )
