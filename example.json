@@ -1,0 +1,13 @@
+{
+	"all": ["your", "base", "are", "belong", "to", "us"],
+	"one": {
+		"two": {
+			"three": 4,
+			"four": true,
+			"five": "six"
+		},
+		"two-point-one": 2.1
+	},
+	"boolean": false,
+	"void": null
+}

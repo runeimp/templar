@@ -34,10 +34,10 @@ test-stdout +data="example.json -f example2.json":
 test-no-dotenv +data="example.env":
 	#!/bin/sh
 	if [ -z "{{data}}" ]; then
-		echo 'CLI_ENV_VAR="Sound and fury" CLI_VAR="As you like it" go run cmd/templar/main.go example.tmpl --no-dotenv'
+		# echo 'CLI_ENV_VAR="Sound and fury" CLI_VAR="As you like it" go run cmd/templar/main.go example.tmpl --no-dotenv'
 		CLI_ENV_VAR="Sound and fury" CLI_VAR="As you like it" go run cmd/templar/main.go example.tmpl --no-dotenv
 	else
-		echo 'CLI_ENV_VAR="Sound and fury" CLI_VAR="As you like it" go run cmd/templar/main.go example.tmpl --data-file {{data}} --no-dotenv'
+		# echo 'CLI_ENV_VAR="Sound and fury" CLI_VAR="As you like it" go run cmd/templar/main.go example.tmpl --data-file {{data}} --no-dotenv'
 		CLI_ENV_VAR="Sound and fury" CLI_VAR="As you like it" go run cmd/templar/main.go example.tmpl --data-file {{data}} --no-dotenv
 	fi
 

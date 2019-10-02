@@ -11,6 +11,7 @@ import (
 
 	"github.com/cbroglie/mustache"
 	"github.com/subosito/gotenv"
+	ini "gopkg.in/ini.v1"
 )
 
 const (
@@ -39,17 +40,10 @@ func init() {
 
 func InitData(checkDotEnv bool, files ...string) (err error) {
 	if initialized == false {
+		// fmt.Printf("templar.InitData() | checkDotEnv = %t\n", checkDotEnv)
 		if checkDotEnv {
 			gotenv.OverLoad()
 		}
-
-		// for _, base := range os.Environ() {
-		// 	pair := strings.SplitN(base, "=", 2)
-		// 	k := pair[0]
-		// 	v := pair[1]
-		// 	// fmt.Printf("templar.InitData() | %s = %s\n", k, v)
-		// 	dataProvider[k] = v
-		// }
 		parseEnvironment()
 		initialized = true
 	}
@@ -57,7 +51,6 @@ func InitData(checkDotEnv bool, files ...string) (err error) {
 	for _, file := range files {
 		parseFileData(file)
 	}
-	// parseFileData(files)
 
 	return err
 }
@@ -75,10 +68,10 @@ func parseEnvironment() {
 func parseFileData(file string) (err error) {
 	if len(file) > 0 {
 		ext := path.Ext(file)
-		fmt.Printf("templar.parseFileData() | ext = %q\n", ext)
+		// fmt.Printf("templar.parseFileData() | ext = %q\n", ext)
 		switch strings.ToUpper(ext) {
 		case ".ENV":
-			fmt.Printf("templar.parseFileData() | Adding ENV data from %q\n", file)
+			// fmt.Printf("templar.parseFileData() | Adding ENV data from %q\n", file)
 			err = gotenv.OverLoad(file)
 			parseEnvironment()
 		case ".INI":
@@ -100,6 +93,32 @@ func parseFileData(file string) (err error) {
 }
 
 func ParseINI(file string) (err error) {
+	var iniData *ini.File
+	iniData, err = ini.Load(file)
+	// fmt.Printf("templar.ParseINI() |        iniData = %#v\n", iniData)
+	// secs := cfg.Sections()
+	// names := cfg.SectionStrings()
+	// fmt.Printf("templar.ParseINI() |       Sections = %#v\n", iniData.Sections())
+	// fmt.Printf("templar.ParseINI() | SectionStrings = %q\n", iniData.SectionStrings())
+
+	for _, section := range iniData.Sections() {
+		// fmt.Printf("templar.ParseINI() | section.Name() = %q | section.KeyStrings() = %q\n", section.Name(), section.KeyStrings())
+		for _, key := range section.Keys() {
+			// fmt.Printf("templar.ParseINI() | %s.%s = %v (%T / %T)\n", section.Name(), key.Name(), key.Value(), key.Value(), key.String())
+			if section.Name() == ini.DEFAULT_SECTION {
+				dataProvider[key.Name()] = key.Value()
+			} else {
+				if _, ok := dataProvider[section.Name()]; ok == false {
+					dataProvider[section.Name()] = make(map[string]string)
+				}
+				dataProvider[section.Name()].((map[string]string))[key.Name()] = key.Value()
+			}
+		}
+	}
+
+	// fmt.Printf("templar.ParseINI() |           Keys = %#v\n", iniData.Section("").Keys())
+	// fmt.Printf("templar.ParseINI() |     KeyStrings = %q\n", iniData.Section("").KeyStrings())
+
 	return err
 }
 
