@@ -12,7 +12,7 @@
 
 
 # Run a test
-@test cmd="help" +data="":
+@test cmd="help" +data="example.env":
 	just _term-wipe
 	just test-{{cmd}} "{{data}}"
 
@@ -23,7 +23,7 @@ test-debug +data="example.env":
 
 # Test the help system
 test-help +data="example.env":
-	go run cmd/templar/main.go --help
+	go run cmd/templar/main.go --help; exit 0
 
 # Test example.env with .env
 test-stdout +data="example.json -f example2.json":
@@ -34,10 +34,10 @@ test-stdout +data="example.json -f example2.json":
 test-no-dotenv +data="example.env":
 	#!/bin/sh
 	if [ -z "{{data}}" ]; then
-		# echo 'CLI_ENV_VAR="Sound and fury" CLI_VAR="As you like it" go run cmd/templar/main.go example.tmpl --no-dotenv'
+		echo 'CLI_ENV_VAR="Sound and fury" CLI_VAR="As you like it" go run cmd/templar/main.go example.tmpl --no-dotenv'
 		CLI_ENV_VAR="Sound and fury" CLI_VAR="As you like it" go run cmd/templar/main.go example.tmpl --no-dotenv
 	else
-		# echo 'CLI_ENV_VAR="Sound and fury" CLI_VAR="As you like it" go run cmd/templar/main.go example.tmpl --data-file {{data}} --no-dotenv'
+		echo 'CLI_ENV_VAR="Sound and fury" CLI_VAR="As you like it" go run cmd/templar/main.go example.tmpl --data-file {{data}} --no-dotenv'
 		CLI_ENV_VAR="Sound and fury" CLI_VAR="As you like it" go run cmd/templar/main.go example.tmpl --data-file {{data}} --no-dotenv
 	fi
 

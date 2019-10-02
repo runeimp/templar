@@ -1,7 +1,6 @@
 package templar
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -95,17 +94,16 @@ func parseFileData(file string) (err error) {
 func ParseINI(file string) (err error) {
 	var iniData *ini.File
 	iniData, err = ini.Load(file)
-	// fmt.Printf("templar.ParseINI() |        iniData = %#v\n", iniData)
-	// secs := cfg.Sections()
-	// names := cfg.SectionStrings()
-	// fmt.Printf("templar.ParseINI() |       Sections = %#v\n", iniData.Sections())
-	// fmt.Printf("templar.ParseINI() | SectionStrings = %q\n", iniData.SectionStrings())
 
 	for _, section := range iniData.Sections() {
 		// fmt.Printf("templar.ParseINI() | section.Name() = %q | section.KeyStrings() = %q\n", section.Name(), section.KeyStrings())
 		for _, key := range section.Keys() {
 			// fmt.Printf("templar.ParseINI() | %s.%s = %v (%T / %T)\n", section.Name(), key.Name(), key.Value(), key.Value(), key.String())
 			if section.Name() == ini.DEFAULT_SECTION {
+				if _, ok := dataProvider[ini.DEFAULT_SECTION]; ok == false {
+					dataProvider[ini.DEFAULT_SECTION] = make(map[string]string)
+				}
+				dataProvider[ini.DEFAULT_SECTION].((map[string]string))[key.Name()] = key.Value()
 				dataProvider[key.Name()] = key.Value()
 			} else {
 				if _, ok := dataProvider[section.Name()]; ok == false {
@@ -145,11 +143,11 @@ func Render(template string) (output string, err error) {
 }
 
 // Test Mustache template system
-func Test() {
-	tmpl, _ := mustache.ParseString("Hello, {{c}}!\n")
-	var buf bytes.Buffer
-	for i := 0; i < 10; i++ {
-		tmpl.FRender(&buf, map[string]string{"c": "world"})
-	}
-	fmt.Println(buf.String())
-}
+// func Test() {
+// 	tmpl, _ := mustache.ParseString("Hello, {{c}}!\n")
+// 	var buf bytes.Buffer
+// 	for i := 0; i < 10; i++ {
+// 		tmpl.FRender(&buf, map[string]string{"c": "world"})
+// 	}
+// 	fmt.Println(buf.String())
+// }
