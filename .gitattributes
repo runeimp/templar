@@ -1,0 +1,6 @@
+*.env linguist-vendored
+*.ini linguist-vendored
+*.json linguist-vendored
+*.tmpl linguist-vendored
+extra/* linguist-vendored
+Justfile linguist-vendored
