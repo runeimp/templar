@@ -11,6 +11,19 @@
 	just --list
 
 
+# Distribution Helper
+@dist sub="release":
+	just dist-{{sub}}
+
+# Distribution Releaser
+dist-release:
+	just _term-wipe
+	goreleaser
+
+# Distribution Tester
+dist-test:
+	goreleaser --snapshot --skip-publish --rm-dist
+
 # Run a test
 @test cmd="help" +data="example.env":
 	just _term-wipe
@@ -46,11 +59,26 @@ test-no-dotenv +data="example.env":
 
 # Test creating an output file
 test-with-file +data="example.env":
-	rm output.txt
-	@# CLI_ENV_VAR="Sound and fury" go run cmd/templar/main.go --output-file output.txt example.tmpl --env-file example.env CLI_VAR="As you like it"
-	CLI_ENV_VAR="Sound and fury" CLI_VAR="As you like it" go run cmd/templar/main.go --output-file output.txt example.tmpl --env-file {{data}}
+	#!/bin/sh
+	rm -f output.txt
+	if [ -z "{{data}}" ]; then
+		CLI_ENV_VAR="Sound and fury" CLI_VAR="As you like it" go run cmd/templar/main.go --output-file output.txt example.tmpl
+	else
+		CLI_ENV_VAR="Sound and fury" CLI_VAR="As you like it" go run cmd/templar/main.go --output-file output.txt example.tmpl --data-file {{data}}
+	fi
+	# CLI_ENV_VAR="Sound and fury" go run cmd/templar/main.go --output-file output.txt example.tmpl --env-file example.env CLI_VAR="As you like it"
+	# CLI_ENV_VAR="Sound and fury" CLI_VAR="As you like it" go run cmd/templar/main.go --output-file output.txt example.tmpl --env-file {{data}}
+	# CLI_ENV_VAR="Sound and fury" CLI_VAR="As you like it" go run cmd/templar/main.go --output-file output.txt example.tmpl --data-file {{data}}
 	cat output.txt
 
+# Run Go Unit Tests
+test-unit +data='':
+	just _term-wipe
+	@# go test
+	@# hr
+	go test -coverprofile=c.out
+	@hr
+	go tool cover -func=c.out
 
 # Wipes the terminal buffer for a clean start
 _term-wipe:
