@@ -25,6 +25,7 @@ builds:
 archives:
   - files:
       - CHANGELOG.md
+      - LICENSE
       - README.md
     format_overrides:
       - goos: windows
