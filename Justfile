@@ -40,12 +40,14 @@ _dir-list:
 # Distribution Releaser
 dist-release:
 	just _term-wipe
-	@# goreleaser
-	goreleaser release --skip-publish
+	goreleaser
+	@# goreleaser release --skip-publish
+	mv *.{deb,gz,md,rpm,txt,yaml,zip} ../distro/templar_2.0.1/
 
 # Distribution Tester
 dist-test:
-	goreleaser --snapshot --skip-publish --rm-dist
+	@# goreleaser --snapshot --skip-publish --rm-dist
+	goreleaser release --skip-publish --rm-dist
 
 
 # Run the command line app
