@@ -456,7 +456,7 @@ else
 			VARS=( "${VARS[@]}" "$1" )
 			;;
 		*)
-			ARGS=( ${ARGS[@]} "$1" )
+			ARGS=( "${ARGS[@]}" "$1" )
 			;;
 		esac
 
