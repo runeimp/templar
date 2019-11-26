@@ -34,12 +34,10 @@ var Data struct {
 
 func init() {
 	dataProvider = make(map[string]interface{})
-
 }
 
 func InitData(checkDotEnv bool, files ...string) (err error) {
 	if initialized == false {
-		// fmt.Printf("templar.InitData() | checkDotEnv = %t\n", checkDotEnv)
 		if checkDotEnv {
 			gotenv.OverLoad()
 		}
@@ -59,7 +57,6 @@ func parseEnvironment() {
 		pair := strings.SplitN(base, "=", 2)
 		k := pair[0]
 		v := pair[1]
-		// fmt.Printf("templar.InitData() | %s = %s\n", k, v)
 		dataProvider[k] = v
 	}
 }
@@ -67,10 +64,8 @@ func parseEnvironment() {
 func parseFileData(file string) (err error) {
 	if len(file) > 0 {
 		ext := path.Ext(file)
-		// fmt.Printf("templar.parseFileData() | ext = %q\n", ext)
 		switch strings.ToUpper(ext) {
 		case ".ENV":
-			// fmt.Printf("templar.parseFileData() | Adding ENV data from %q\n", file)
 			err = gotenv.OverLoad(file)
 			parseEnvironment()
 		case ".INI":
@@ -96,9 +91,7 @@ func ParseINI(file string) (err error) {
 	iniData, err = ini.Load(file)
 
 	for _, section := range iniData.Sections() {
-		// fmt.Printf("templar.ParseINI() | section.Name() = %q | section.KeyStrings() = %q\n", section.Name(), section.KeyStrings())
 		for _, key := range section.Keys() {
-			// fmt.Printf("templar.ParseINI() | %s.%s = %v (%T / %T)\n", section.Name(), key.Name(), key.Value(), key.Value(), key.String())
 			if section.Name() == ini.DEFAULT_SECTION {
 				if _, ok := dataProvider[ini.DEFAULT_SECTION]; ok == false {
 					dataProvider[ini.DEFAULT_SECTION] = make(map[string]string)
@@ -114,9 +107,6 @@ func ParseINI(file string) (err error) {
 		}
 	}
 
-	// fmt.Printf("templar.ParseINI() |           Keys = %#v\n", iniData.Section("").Keys())
-	// fmt.Printf("templar.ParseINI() |     KeyStrings = %q\n", iniData.Section("").KeyStrings())
-
 	return err
 }
 
@@ -129,12 +119,14 @@ func ParseJSON(file string) (err error) {
 			return err
 		}
 		err = json.Unmarshal(jsonData, &dataProvider)
-
 	}
-	// fmt.Printf("templar.ParseJSON() |     jsonData = %s\n", string(jsonData))
-	// fmt.Printf("templar.ParseJSON() | dataProvider = %#v\n", dataProvider)
 
 	return err
+}
+
+func Reinitialize() {
+	dataProvider = make(map[string]interface{})
+	initialized = false
 }
 
 func Render(template string) (output string, err error) {
@@ -142,7 +134,7 @@ func Render(template string) (output string, err error) {
 	return output, err
 }
 
-func RenderFile(filename, template string) (output string, err error) {
+func RenderToFile(filename, template string) (output string, err error) {
 	output, err = mustache.RenderFile(template, dataProvider)
 	if err != nil {
 		return output, err
@@ -150,13 +142,3 @@ func RenderFile(filename, template string) (output string, err error) {
 	err = ioutil.WriteFile(filename, []byte(output), 0644)
 	return output, err
 }
-
-// Test Mustache template system
-// func Test() {
-// 	tmpl, _ := mustache.ParseString("Hello, {{c}}!\n")
-// 	var buf bytes.Buffer
-// 	for i := 0; i < 10; i++ {
-// 		tmpl.FRender(&buf, map[string]string{"c": "world"})
-// 	}
-// 	fmt.Println(buf.String())
-// }

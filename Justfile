@@ -10,19 +10,47 @@
 	just _term-wipe
 	just --list
 
+# Cleanup around here!
+clean:
+	just _term-wipe
+	rm -f *.out
+	rm -f output.txt
+	rm -rf dist
+	@just _dir-list
+
+
+# Directory Lister
+_dir-list:
+	#!/bin/sh
+	if [[ ! -z "$(which lsd)" ]]; then
+		echo "$ lsd -al"
+		lsd -al
+	elif [[ "$(uname -s)" = "Darwin" ]]; then
+		echo "$ ls -alG"
+		ls -alG
+	else
+		echo "$ ls -al --color=always"
+		ls -al --color=always
+	fi
+	
 
 # Distribution Helper
 @dist sub="release":
 	just dist-{{sub}}
-
 # Distribution Releaser
 dist-release:
 	just _term-wipe
-	goreleaser
+	@# goreleaser
+	goreleaser release --skip-publish
 
 # Distribution Tester
 dist-test:
 	goreleaser --snapshot --skip-publish --rm-dist
+
+
+# Run the command line app
+run +args="":
+	go run cmd/templar/main.go {{args}}
 
 # Run a test
 @test cmd="help" +data="example.env":

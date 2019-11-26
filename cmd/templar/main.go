@@ -20,10 +20,9 @@ import (
  * CONSTANTS
  */
 const (
-	AppDesc    = "Command line templating system based on Mustache template engine and data supplied by environment variables, ENV, INI, and JSON files. And soon YAML, and TOML files as well."
-	AppName    = "Templar"
-	AppVersion = "2.0.0"
-	CLIName    = "templar"
+	AppDesc = "Command line templating system based on Mustache template engine and data supplied by environment variables, ENV, INI, and JSON files. And soon YAML, and TOML files as well."
+	AppName = "Templar"
+	CLIName = "templar"
 )
 
 const (
@@ -35,10 +34,19 @@ const (
 )
 
 /*
+ * GENERATED VARIABLES
+ */
+var (
+	version = "oid"
+	commit  = "none"
+	date    = "unknown"
+)
+
+/*
  * DERIVED CONSTANTS
  */
 var (
-	AppLabel = fmt.Sprintf("%s v%s", AppName, AppVersion)
+	AppLabel = fmt.Sprintf("%s v%s\n%s Library v%s", AppName, version, templar.Name, templar.Version)
 )
 
 /*
@@ -55,6 +63,7 @@ var cli struct {
 	NoDotenv   bool     `short:"n" help:"Do not load a local .env file if present."`
 	OutputFile string   `short:"o" help:"Output to the specified file." placeholder:"FILE" sep:' ' type:"file"`
 	Template   string   `arg optional help:"Specify the template file to render." type:"existingfile"`
+	Version    bool     `short:"v" help:"Show version info."`
 	// ____       string `arg:"-_" help:"____"`
 	// ____       string `arg:"-_" help:"____"`
 }
@@ -75,6 +84,11 @@ var (
 
 func init() {
 	ctx = kong.Parse(&cli, kong.Name(CLIName), kong.Description(AppDesc))
+
+	if cli.Version {
+		fmt.Println(AppLabel)
+		os.Exit(0)
+	}
 }
 
 /*
@@ -82,8 +96,7 @@ func init() {
  */
 func main() {
 	if cli.Debug {
-		fmt.Printf("%s\n", AppLabel)
-		fmt.Printf("%s Library v%s\n", templar.Name, templar.Version)
+		fmt.Println(AppLabel)
 	}
 
 	if len(cli.Template) == 0 {
@@ -138,13 +151,13 @@ func main() {
 	err := templar.InitData(checkDotEnv, envFiles...)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "ENV File Parsing Error: %s\n", err.Error())
-		os.Exit(ErrorJSONParsing)
+		os.Exit(ErrorENVParsing)
 	}
 
 	err = templar.InitData(checkDotEnv, iniFiles...)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "INI File Parsing Error: %s\n", err.Error())
-		os.Exit(ErrorJSONParsing)
+		os.Exit(ErrorINIParsing)
 	}
 
 	err = templar.InitData(checkDotEnv, jsonFiles...)
@@ -154,7 +167,7 @@ func main() {
 	}
 
 	if len(cli.OutputFile) > 0 {
-		_, err := templar.RenderFile(cli.OutputFile, cli.Template)
+		_, err := templar.RenderToFile(cli.OutputFile, cli.Template)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Template Rendering Error: %s\n", err.Error())
 			os.Exit(ErrorTemplateRendering)

@@ -12,6 +12,7 @@ Features
 	* [x] System environment variables
 	* [x] `.env` file variables
 		* [x] Automatic loading of local `.env` file variables
+		* [x] Option to exclude automatic loading of a local `.env` file
 	* [x] INI file data
 	* [x] JSON file data
 	* [ ] YAML file data
