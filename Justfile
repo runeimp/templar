@@ -3,6 +3,8 @@
 # I highly recommend using just for basic automation.
 #
 
+alias ver := version
+
 # Like in make the first recipe is used by default.
 # I like listing all the recipes by default.
 # I also like wiping the terminal buffer like CLS in DOS. It makes me happy.  :-)
@@ -144,4 +146,7 @@ _term-wipe:
 	else
 		clear
 	fi
+
+@version:
+	cat templar.go | grep -F 'Version =' | cut -d'"' -f2
 
