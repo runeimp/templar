@@ -1,20 +1,14 @@
 Templar ChangeLog
 =================
 
-v2.0.2
+v0.1.1
 ------
 
-* Updated dot files and docs
+1. Updated docs
+2. Updated distribution release scripting
 
 
-v2.0.1
-------
-
-* Updated dot files
-* Added ChangeLog
-
-
-v2.0.0
+v0.1.0
 ------
 
 New version based on Mustache templating and written in Go. :-D
