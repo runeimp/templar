@@ -44,11 +44,14 @@ _dir-list:
 # Distribution Helper
 @dist sub="release":
 	just dist-{{sub}}
+
 # Distribution Releaser
 dist-release:
 	#!/bin/sh
 	just _term-wipe
 	just _clean
+	git checkout master
+	git push --all && git push --tags
 	goreleaser
 	# goreleaser release --skip-publish
 	ver="$(git tag | tail -1)"
@@ -61,6 +64,7 @@ dist-release:
 		cd dist
 		mv *.{deb,gz,md,rpm,txt,yaml,zip} ../distro/templar_${ver}/
 	fi
+	git checkout develop
 
 # Distribution Tester
 dist-test:
