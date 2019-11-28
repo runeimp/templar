@@ -1,5 +1,8 @@
-Templar v2.0.2
-==============
+Templar
+=======
+
+Templar Command Line Tool v2.0.0
+Templar Library v0.1.0
 
 Command line templating system written in Go. Though the initial idea was written in BASH. And that was cool; but that version had serious limitations as well. Go to the rescue!
 
@@ -28,12 +31,14 @@ Usage
 
 ```bash
 $ templar template.mustache
+The contents of the template with {{placeholders}}
+populated from the system environment and (if present)
+the environment settings of a .env file.
 ```
 
 
 Example
 -------
-
 
 ### INI Files
 
@@ -64,11 +69,7 @@ Test Suite
 
 Test uses Go's normal unit testing tools at this time.
 
-
-Fitness for Use
----------------
-
-I give no guarantees for this tools fitness for use on any specific system. I suspect it is "safe enough" for use on any untested systems. I've only used this on my own iMac with macOS Mojave on it. I share this code with the world so as to be easy for me to reference personally and in the hope that others will find it useful. Though I strive for portability and usefulness I make no claim that it will always work as expected in any given situation on any system tested.
+Test Coverage: 83.9%
 
 
 

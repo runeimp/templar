@@ -13,6 +13,9 @@ import (
 	ini "gopkg.in/ini.v1"
 )
 
+/*
+ * CONSTANTS
+ */
 const (
 	// Name denotes the library name
 	Name = "Templar"
@@ -21,17 +24,26 @@ const (
 	Version = "0.1.0"
 )
 
+/*
+ * VARIABLES
+ */
 var (
 	dataProvider map[string]interface{}
 	initialized  = false
 )
 
+/*
+ * TYPES
+ */
 var Data struct {
 	INIFile  []string
 	JSONFile []string
 	Template string
 }
 
+/*
+ * METHODS
+ */
 func init() {
 	dataProvider = make(map[string]interface{})
 }

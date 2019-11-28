@@ -1,11 +1,11 @@
-//
-// PACKAGES
-//
+/*
+ * PACKAGE
+ */
 package main
 
-//
-// IMPORTS
-//
+/*
+ * IMPORTS
+ */
 import (
 	"fmt"
 	"os"
@@ -20,9 +20,10 @@ import (
  * CONSTANTS
  */
 const (
-	AppDesc = "Command line templating system based on Mustache template engine and data supplied by environment variables, ENV, INI, and JSON files. And soon YAML, and TOML files as well."
-	AppName = "Templar"
-	CLIName = "templar"
+	AppDesc    = "Command line templating system based on Mustache template engine and data supplied by environment variables, ENV, INI, and JSON files. And soon YAML, and TOML files as well."
+	AppName    = "Templar"
+	AppVersion = "2.0.0"
+	CLIName    = "templar"
 )
 
 const (
@@ -37,16 +38,15 @@ const (
  * GENERATED VARIABLES
  */
 var (
-	version = "oid"
-	commit  = "none"
-	date    = "unknown"
+	commit = "none"
+	date   = "unknown"
 )
 
 /*
  * DERIVED CONSTANTS
  */
 var (
-	AppLabel = fmt.Sprintf("%s v%s\n%s Library v%s", AppName, version, templar.Name, templar.Version)
+	AppLabel = fmt.Sprintf("%s v%s\n%s Library v%s", AppName, AppVersion, templar.Name, templar.Version)
 )
 
 /*

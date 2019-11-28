@@ -1,7 +1,13 @@
 Templar ChangeLog
 =================
 
-V2.0.1
+v2.0.2
+------
+
+* Updated dot files and docs
+
+
+v2.0.1
 ------
 
 * Updated dot files

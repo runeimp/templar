@@ -3,6 +3,8 @@
 # I highly recommend using just for basic automation.
 #
 
+alias ver := version
+
 # Like in make the first recipe is used by default.
 # I like listing all the recipes by default.
 # I also like wiping the terminal buffer like CLS in DOS. It makes me happy.  :-)
@@ -10,12 +12,17 @@
 	just _term-wipe
 	just --list
 
-# Cleanup around here!
-clean:
-	just _term-wipe
+
+# The real cleaner
+@_clean:
 	rm -f *.out
 	rm -f output.txt
 	rm -rf dist
+
+# Cleanup around here!
+clean:
+	just _term-wipe
+	just _clean
 	@just _dir-list
 
 
@@ -39,15 +46,28 @@ _dir-list:
 	just dist-{{sub}}
 # Distribution Releaser
 dist-release:
+	#!/bin/sh
 	just _term-wipe
+	just _clean
 	goreleaser
-	@# goreleaser release --skip-publish
-	mv *.{deb,gz,md,rpm,txt,yaml,zip} ../distro/templar_2.0.1/
+	# goreleaser release --skip-publish
+	ver="$(git tag | tail -1)"
+	ver="${ver:1}"
+	if [ -d "distro/templar_${ver}" ]; then
+		echo "WARNING: Do you need to tag a new release first?"
+		echo "A directory already exists for templar_${ver}"
+	else
+		echo mkdir -p "distro/templar_${ver}"
+		cd dist
+		echo mv *.{deb,gz,md,rpm,txt,yaml,zip} ../distro/templar_${ver}/
+	fi
 
 # Distribution Tester
 dist-test:
+	just _term-wipe
+	@just _clean
 	@# goreleaser --snapshot --skip-publish --rm-dist
-	goreleaser release --skip-publish --rm-dist
+	goreleaser release --skip-publish
 
 
 # Run the command line app
@@ -126,4 +146,7 @@ _term-wipe:
 	else
 		clear
 	fi
+
+@version:
+	cat templar.go | grep -F 'Version =' | cut -d'"' -f2
 
