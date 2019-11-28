@@ -57,9 +57,9 @@ dist-release:
 		echo "WARNING: Do you need to tag a new release first?"
 		echo "A directory already exists for templar_${ver}"
 	else
-		echo mkdir -p "distro/templar_${ver}"
+		mkdir -p "distro/templar_${ver}"
 		cd dist
-		echo mv *.{deb,gz,md,rpm,txt,yaml,zip} ../distro/templar_${ver}/
+		mv *.{deb,gz,md,rpm,txt,yaml,zip} ../distro/templar_${ver}/
 	fi
 
 # Distribution Tester
