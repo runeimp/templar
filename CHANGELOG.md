@@ -1,6 +1,13 @@
 Templar ChangeLog
 =================
 
+v0.1.1
+------
+
+1. Updated docs
+2. Updated distribution release scripting
+
+
 v0.1.0
 ------
 
