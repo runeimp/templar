@@ -9,7 +9,8 @@ import (
 	"strings"
 
 	"github.com/cbroglie/mustache"
-	"github.com/subosito/gotenv"
+	// "github.com/subosito/gotenv"
+	"github.com/runeimp/gotenv"
 	ini "gopkg.in/ini.v1"
 )
 
@@ -21,20 +22,35 @@ const (
 	Name = "Templar"
 
 	// Version denotes the library version
-	Version = "0.1.1"
+	Version = "0.2.0"
+)
+
+/*
+ * CONSTANTS
+ */
+const (
+	DebugOff   = 0
+	DebugLog   = 1
+	DebugInfo  = 2
+	DebugWarn  = 3
+	DebugError = 4
 )
 
 /*
  * VARIABLES
  */
 var (
+	// envBackupData map[string]string
 	dataProvider map[string]interface{}
+	Debug        = DebugWarn
 	initialized  = false
 )
 
 /*
  * TYPES
  */
+
+// Data is a collection for all external data
 var Data struct {
 	INIFile  []string
 	JSONFile []string
@@ -44,11 +60,48 @@ var Data struct {
 /*
  * METHODS
  */
+// func envBackup() {
+// 	if Debug <= DebugWarn {
+// 		fmt.Fprintln(os.Stderr, "templar.envBackup()")
+// 	}
+
+// 	envBackupData = make(map[string]string)
+
+// 	for _, envar := range os.Environ() {
+// 		kv := strings.Split(envar, "=")
+// 		k := kv[0]
+// 		v := kv[1]
+// 		if Debug <= DebugLog {
+// 			fmt.Fprintf(os.Stderr, "templar.envBackup() | envBackupData[%q] = %q\n", k, v)
+// 		}
+
+// 		envBackupData[k] = v
+// 	}
+// }
+
+// func envReset() {
+// 	if Debug <= DebugWarn {
+// 		fmt.Fprintln(os.Stderr, "templar.envReset()")
+// 	}
+// 	os.Clearenv()
+// 	for k, v := range envBackupData {
+// 		if Debug <= DebugLog {
+// 			fmt.Fprintf(os.Stderr, "templar.envReset() | os.Setenv(%q, %q)\n", k, v)
+// 		}
+// 		os.Setenv(k, v)
+// 	}
+// }
+
 func init() {
 	dataProvider = make(map[string]interface{})
+	// envBackup()
 }
 
+// InitData initializes the template environment with external data
 func InitData(checkDotEnv bool, files ...string) (err error) {
+	if Debug <= DebugInfo {
+		fmt.Fprintf(os.Stderr, "templar.InitData() | checkDotEnv = %t | initialized = %t\n", checkDotEnv, initialized)
+	}
 	if initialized == false {
 		if checkDotEnv {
 			gotenv.OverLoad()
@@ -65,6 +118,9 @@ func InitData(checkDotEnv bool, files ...string) (err error) {
 }
 
 func parseEnvironment() {
+	if Debug <= DebugInfo {
+		fmt.Fprintf(os.Stderr, "templar.parseEnvironment() | initialized = %t\n", initialized)
+	}
 	for _, base := range os.Environ() {
 		pair := strings.SplitN(base, "=", 2)
 		k := pair[0]
@@ -74,10 +130,16 @@ func parseEnvironment() {
 }
 
 func parseFileData(file string) (err error) {
+	if Debug <= DebugInfo {
+		fmt.Fprintf(os.Stderr, "templar.parseFileData() | file = %q\n", file)
+	}
 	if len(file) > 0 {
 		ext := path.Ext(file)
 		switch strings.ToUpper(ext) {
 		case ".ENV":
+			if Debug <= DebugInfo {
+				fmt.Fprintf(os.Stderr, "templar.parseFileData() | .ENV | gotenv.OverLoad(%q)\n", file)
+			}
 			err = gotenv.OverLoad(file)
 			parseEnvironment()
 		case ".INI":
@@ -91,13 +153,14 @@ func parseFileData(file string) (err error) {
 				return err
 			}
 		default:
-			fmt.Errorf("Unknown data file type: %q\n", ext)
+			fmt.Errorf("Unknown data file type: %q", ext)
 		}
 	}
 
 	return err
 }
 
+// ParseINI loads INI file data into the dataProvider
 func ParseINI(file string) (err error) {
 	var iniData *ini.File
 	iniData, err = ini.Load(file)
@@ -122,6 +185,7 @@ func ParseINI(file string) (err error) {
 	return err
 }
 
+// ParseJSON loads JSON file data into the dataProvider
 func ParseJSON(file string) (err error) {
 	var jsonData []byte
 
@@ -136,16 +200,24 @@ func ParseJSON(file string) (err error) {
 	return err
 }
 
-func Reinitialize() {
+// Reinitialize resets the dataProvider
+func Reinitialize(debug int) {
+	Debug = debug
+	if Debug <= DebugInfo {
+		fmt.Fprintf(os.Stderr, "templar.Reinitialize() | debug = %d | initialized = %t\n", debug, initialized)
+	}
 	dataProvider = make(map[string]interface{})
+	gotenv.Reset()
 	initialized = false
 }
 
+// Render handles template rendering
 func Render(template string) (output string, err error) {
 	output, err = mustache.RenderFile(template, dataProvider)
 	return output, err
 }
 
+// RenderToFile handles rendering templates to file
 func RenderToFile(filename, template string) (output string, err error) {
 	output, err = mustache.RenderFile(template, dataProvider)
 	if err != nil {

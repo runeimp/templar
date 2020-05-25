@@ -1,6 +1,4 @@
-/*
- * PACKAGE
- */
+// PACKAGE
 package main
 
 /*
@@ -17,7 +15,7 @@ import (
 )
 
 /*
- * CONSTANTS
+ * APP CONSTANTS
  */
 const (
 	AppDesc    = "Command line templating system based on Mustache template engine and data supplied by environment variables, ENV, INI, and JSON files. And soon YAML, and TOML files as well."
@@ -26,6 +24,9 @@ const (
 	CLIName    = "templar"
 )
 
+/*
+ * CONSTANTS
+ */
 const (
 	ErrorENVParsing = iota + 50
 	ErrorINIParsing
@@ -109,6 +110,8 @@ func main() {
 		os.Exit(ErrorTemplateMissing)
 	}
 
+	templar.Debug = cli.Debug
+
 	// fmt.Printf("templar.main() | cli.DataFile = %q\n", cli.DataFile)
 	for _, file := range cli.DataFile {
 		ext := path.Ext(file)
@@ -120,7 +123,7 @@ func main() {
 		case ".JSON":
 			jsonFiles = append(jsonFiles, file)
 		default:
-			fmt.Errorf("Unknown data file type: %q\n", ext)
+			fmt.Errorf("Unknown data file type: %q", ext)
 		}
 	}
 	// fmt.Printf("templar.main() | templar.Data = %#v\n", templar.Data)
@@ -141,11 +144,11 @@ func main() {
 	// fmt.Printf("templar.main() | cli.Template = %q\n", cli.Template)
 	// fmt.Printf("templar.main() | templar.Data = %#v\n", templar.Data)
 	if cli.Debug {
-		fmt.Printf("templar.main() |    envFiles = %#v\n", envFiles)
-		fmt.Printf("templar.main() |    iniFiles = %#v\n", iniFiles)
-		fmt.Printf("templar.main() |   jsonFiles = %#v\n", jsonFiles)
-		fmt.Printf("templar.main() |    template = %q\n", cli.Template)
-		fmt.Printf("templar.main() | checkDotEnv = %t\n", checkDotEnv)
+		fmt.Fprintf(os.Stderr, "templar.main() |    envFiles = %#v\n", envFiles)
+		fmt.Fprintf(os.Stderr, "templar.main() |    iniFiles = %#v\n", iniFiles)
+		fmt.Fprintf(os.Stderr, "templar.main() |   jsonFiles = %#v\n", jsonFiles)
+		fmt.Fprintf(os.Stderr, "templar.main() |    template = %q\n", cli.Template)
+		fmt.Fprintf(os.Stderr, "templar.main() | checkDotEnv = %t\n", checkDotEnv)
 	}
 
 	err := templar.InitData(checkDotEnv, envFiles...)

@@ -4,6 +4,8 @@
 #
 
 alias ver := version
+# set load-dotenv := false # Not supported yet
+# load-dotenv := false
 
 # Like in make the first recipe is used by default.
 # I like listing all the recipes by default.
@@ -76,6 +78,8 @@ dist-test:
 
 # Run the command line app
 run +args="":
+	just _term-wipe
+	# NOTE: Just itself ALWAYS loads a .env file if present
 	go run cmd/templar/main.go {{args}}
 
 # Run a test
