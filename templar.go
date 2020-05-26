@@ -10,12 +10,14 @@ import (
 
 	"github.com/cbroglie/mustache"
 	// "github.com/subosito/gotenv"
+	toml "github.com/pelletier/go-toml"
 	"github.com/runeimp/gotenv"
 	ini "gopkg.in/ini.v1"
+	yaml "gopkg.in/yaml.v2"
 )
 
 /*
- * CONSTANTS
+ * LIB CONSTANTS
  */
 const (
 	// Name denotes the library name
@@ -30,10 +32,10 @@ const (
  */
 const (
 	DebugOff   = 0
-	DebugLog   = 1
-	DebugInfo  = 2
-	DebugWarn  = 3
-	DebugError = 4
+	DebugError = 1
+	DebugWarn  = 2
+	DebugInfo  = 3
+	DebugLog   = 4
 )
 
 /*
@@ -60,48 +62,24 @@ var Data struct {
 /*
  * METHODS
  */
-// func envBackup() {
-// 	if Debug <= DebugWarn {
-// 		fmt.Fprintln(os.Stderr, "templar.envBackup()")
-// 	}
 
-// 	envBackupData = make(map[string]string)
-
-// 	for _, envar := range os.Environ() {
-// 		kv := strings.Split(envar, "=")
-// 		k := kv[0]
-// 		v := kv[1]
-// 		if Debug <= DebugLog {
-// 			fmt.Fprintf(os.Stderr, "templar.envBackup() | envBackupData[%q] = %q\n", k, v)
-// 		}
-
-// 		envBackupData[k] = v
-// 	}
-// }
-
-// func envReset() {
-// 	if Debug <= DebugWarn {
-// 		fmt.Fprintln(os.Stderr, "templar.envReset()")
-// 	}
-// 	os.Clearenv()
-// 	for k, v := range envBackupData {
-// 		if Debug <= DebugLog {
-// 			fmt.Fprintf(os.Stderr, "templar.envReset() | os.Setenv(%q, %q)\n", k, v)
-// 		}
-// 		os.Setenv(k, v)
-// 	}
-// }
+func debugDataPrint(l string, m map[string]interface{}) {
+	fmt.Fprintf(os.Stderr, l)
+	jsonBytes, _ := json.MarshalIndent(m, "", "    ")
+	fmt.Println(string(jsonBytes))
+	fmt.Printf("\n\n")
+}
 
 func init() {
 	dataProvider = make(map[string]interface{})
-	// envBackup()
 }
 
 // InitData initializes the template environment with external data
 func InitData(checkDotEnv bool, files ...string) (err error) {
-	if Debug <= DebugInfo {
+	if Debug >= DebugInfo {
 		fmt.Fprintf(os.Stderr, "templar.InitData() | checkDotEnv = %t | initialized = %t\n", checkDotEnv, initialized)
 	}
+
 	if initialized == false {
 		if checkDotEnv {
 			gotenv.OverLoad()
@@ -117,8 +95,16 @@ func InitData(checkDotEnv bool, files ...string) (err error) {
 	return err
 }
 
+func mapMerge(a map[string]interface{}, b map[string]interface{}) map[string]interface{} {
+	for k, v := range b {
+		a[k] = v
+	}
+
+	return a
+}
+
 func parseEnvironment() {
-	if Debug <= DebugInfo {
+	if Debug >= DebugInfo {
 		fmt.Fprintf(os.Stderr, "templar.parseEnvironment() | initialized = %t\n", initialized)
 	}
 	for _, base := range os.Environ() {
@@ -130,18 +116,17 @@ func parseEnvironment() {
 }
 
 func parseFileData(file string) (err error) {
-	if Debug <= DebugInfo {
+	if Debug >= DebugInfo {
 		fmt.Fprintf(os.Stderr, "templar.parseFileData() | file = %q\n", file)
 	}
 	if len(file) > 0 {
 		ext := path.Ext(file)
 		switch strings.ToUpper(ext) {
 		case ".ENV":
-			if Debug <= DebugInfo {
-				fmt.Fprintf(os.Stderr, "templar.parseFileData() | .ENV | gotenv.OverLoad(%q)\n", file)
+			err = ParseENV(file)
+			if err != nil {
+				return err
 			}
-			err = gotenv.OverLoad(file)
-			parseEnvironment()
 		case ".INI":
 			err = ParseINI(file)
 			if err != nil {
@@ -152,10 +137,31 @@ func parseFileData(file string) (err error) {
 			if err != nil {
 				return err
 			}
+		case ".TOML":
+			err = ParseTOML(file)
+			if err != nil {
+				return err
+			}
+		case ".YAML":
+			err = ParseYAML(file)
+			if err != nil {
+				return err
+			}
 		default:
 			fmt.Errorf("Unknown data file type: %q", ext)
 		}
 	}
+
+	return err
+}
+
+// ParseENV loads ENV file data into the dataProvider
+func ParseENV(file string) (err error) {
+	if Debug >= DebugInfo {
+		fmt.Fprintf(os.Stderr, "templar.parseFileData() | .ENV | gotenv.OverLoad(%q)\n", file)
+	}
+	err = gotenv.OverLoad(file)
+	parseEnvironment()
 
 	return err
 }
@@ -187,14 +193,62 @@ func ParseINI(file string) (err error) {
 
 // ParseJSON loads JSON file data into the dataProvider
 func ParseJSON(file string) (err error) {
-	var jsonData []byte
+	var (
+		jsonBytes    []byte
+		jsonProvider map[string]interface{}
+	)
 
 	if len(file) > 0 {
-		jsonData, err = ioutil.ReadFile(file)
+		jsonBytes, err = ioutil.ReadFile(file)
 		if err != nil {
 			return err
 		}
-		err = json.Unmarshal(jsonData, &dataProvider)
+		err = json.Unmarshal(jsonBytes, &jsonProvider)
+		if err == nil {
+			dataProvider = mapMerge(dataProvider, jsonProvider)
+		}
+	}
+
+	return err
+}
+
+// ParseTOML loads TOML file data into the dataProvider
+func ParseTOML(file string) (err error) {
+	var (
+		tomlBytes    []byte
+		tomlProvider map[string]interface{}
+	)
+
+	if len(file) > 0 {
+		tomlBytes, err = ioutil.ReadFile(file)
+		if err != nil {
+			return err
+		}
+		err = toml.Unmarshal(tomlBytes, &tomlProvider)
+		if err == nil {
+			dataProvider = mapMerge(dataProvider, tomlProvider)
+		}
+	}
+
+	return err
+}
+
+// ParseYAML loads YAML file data into the dataProvider
+func ParseYAML(file string) (err error) {
+	var (
+		yamlBytes    []byte
+		yamlProvider map[string]interface{}
+	)
+
+	if len(file) > 0 {
+		yamlBytes, err = ioutil.ReadFile(file)
+		if err != nil {
+			return err
+		}
+		err = yaml.Unmarshal(yamlBytes, &yamlProvider)
+		if err == nil {
+			dataProvider = mapMerge(dataProvider, yamlProvider)
+		}
 	}
 
 	return err
@@ -203,7 +257,7 @@ func ParseJSON(file string) (err error) {
 // Reinitialize resets the dataProvider
 func Reinitialize(debug int) {
 	Debug = debug
-	if Debug <= DebugInfo {
+	if Debug >= DebugInfo {
 		fmt.Fprintf(os.Stderr, "templar.Reinitialize() | debug = %d | initialized = %t\n", debug, initialized)
 	}
 	dataProvider = make(map[string]interface{})

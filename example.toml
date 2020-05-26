@@ -1,0 +1,11 @@
+all = ["your", "base", "are", "belong", "to", "us"]
+boolean = false
+# void =
+
+[one]
+  two-point-one = 2.1
+
+  [one.two]
+    five = "six"
+    four = true
+    three = 4

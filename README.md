@@ -19,8 +19,8 @@ Features
 		* [x] Option to exclude automatic loading of a local `.env` file
 	* [x] INI file data
 	* [x] JSON file data
-	* [ ] YAML file data
-	* [ ] TOML file data
+	* [x] YAML file data
+	* [x] TOML file data
 	* [ ] XML file data?
 	* [ ] CSV file data?
 	* [ ] SQLite database query?
@@ -69,7 +69,17 @@ Test Suite
 
 Test uses Go's normal unit testing tools at this time.
 
-Test Coverage: 83.9%
+Test Coverage: 78.1%
+
+It was 83.9% but I added more stuff to test. :angel:
+
+
+ToDo
+----
+
+* [ ] Add MVVM features so that the data input can processed into a ViewModel to limit or manipulate the input in simple ways for the View (template)
+* [ ] Complete the data input options
+* [ ] Optimize the data processing. Make it more memory friendly on constrained systems and allow for say referencing (for instance) a terabyte sized CSV file for data input.
 
 
 

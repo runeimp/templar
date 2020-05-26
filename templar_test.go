@@ -57,6 +57,23 @@ DEFAULT.global_ini == true
 
 `
 
+var dotEnvINIAndTOMLExpectation = `Hello Hamlet!
+How do you like it in "/Users/runeimp/Dropbox/Profile/Home/dev/apps/templar"?
+
+  ENV_FILE_COMMENT == ''
+      ENV_FILE_VAR == '.env Ninja!'
+       CLI_ENV_VAR == 'Sound and fury'
+           CLI_VAR == 'As you like it'
+           boolean == false
+     one.two.three == 4
+       numbers.two == 2.1
+               all == your base are belong to us
+         words.all == your base are belong to us
+             POSIX == Awesome!
+DEFAULT.global_ini == true
+
+`
+
 var dotEnvAndJSONExpectation = `Hello Horatio!
 How do you like it in "/Users/runeimp/Dropbox/Profile/Home/dev/apps/templar"?
 
@@ -102,6 +119,9 @@ func TestTemplar(t *testing.T) {
     {name: ".env", template: "example.tmpl", checkDotEnv: true, want: dotEnvExpectation},
     {name: ".env and example.ini", template: "example.tmpl", checkDotEnv: true, data: []string{"example.ini"}, want: dotEnvAndINIExpectation},
     {name: ".env and example.json", template: "example.tmpl", checkDotEnv: true, data: []string{"example.json"}, want: dotEnvAndJSONExpectation},
+    {name: ".env and example.toml", template: "example.tmpl", checkDotEnv: true, data: []string{"example.toml"}, want: dotEnvAndJSONExpectation},
+    {name: ".env and example.yaml", template: "example.tmpl", checkDotEnv: true, data: []string{"example.yaml"}, want: dotEnvAndJSONExpectation},
+    {name: ".env, example.ini, and example.toml", template: "example.tmpl", checkDotEnv: true, data: []string{"example.ini", "example.toml"}, want: dotEnvINIAndTOMLExpectation},
     {name: "example.env", template: "example.tmpl", checkDotEnv: false, data: []string{"example.env"}, want: exampleDotEnvExpectation},
     {name: "no.env", template: "example.tmpl", checkDotEnv: false, want: noDotEnvExpectation},
   }

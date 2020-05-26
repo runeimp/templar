@@ -18,9 +18,9 @@ import (
  * APP CONSTANTS
  */
 const (
-	AppDesc    = "Command line templating system based on Mustache template engine and data supplied by environment variables, ENV, INI, and JSON files. And soon YAML, and TOML files as well."
+	AppDesc    = "Command line templating system based on Mustache template engine and data supplied by environment variables, ENV, INI, JSON, YAML, and TOML files. And soon CSV, XML, and SQLite files as well."
 	AppName    = "Templar"
-	AppVersion = "2.0.0"
+	AppVersion = "2.1.0"
 	CLIName    = "templar"
 )
 
@@ -33,6 +33,8 @@ const (
 	ErrorJSONParsing
 	ErrorTemplateMissing
 	ErrorTemplateRendering
+	ErrorTOMLParsing
+	ErrorYAMLParsing
 )
 
 /*
@@ -60,7 +62,9 @@ var cli struct {
 	DataFile   []string `short:"f" help:"Use the specified DATA_FILE to populate the template environment. File type determined by the extension on the file name." placeholder:"DATA_FILE" type:"existingfile"`
 	DataINI    []string `short:"i" help:"Use the specified INI_FILE (regardless of it's file extension) to populate the template environment." placeholder:"INI_FILE" type:"existingfile"`
 	DataJSON   []string `short:"j" help:"Use the specified JSON_FILE (regardless of it's file extension) to populate the template environment." placeholder:"JSON_FILE" type:"existingfile"`
-	Debug      bool     `help:"Show debug info on stderr." hidden`
+	DataTOML   []string `short:"t" help:"Use the specified TOML_FILE (regardless of it's file extension) to populate the template environment." placeholder:"TOML_FILE" type:"existingfile"`
+	DataYAML   []string `short:"y" help:"Use the specified YAML_FILE (regardless of it's file extension) to populate the template environment." placeholder:"YAML_FILE" type:"existingfile"`
+	Debug      int      `help:"Show debug info on stderr." default:"0" hidden`
 	NoDotenv   bool     `short:"n" help:"Do not load a local .env file if present."`
 	OutputFile string   `short:"o" help:"Output to the specified file." placeholder:"FILE" sep:' ' type:"file"`
 	Template   string   `arg optional help:"Specify the template file to render." type:"existingfile"`
@@ -77,6 +81,8 @@ var (
 	envFiles  []string
 	iniFiles  []string
 	jsonFiles []string
+	tomlFiles []string
+	yamlFiles []string
 )
 
 /*
@@ -96,7 +102,7 @@ func init() {
  * MAIN ENTRYPOINT
  */
 func main() {
-	if cli.Debug {
+	if cli.Debug > templar.DebugOff {
 		fmt.Println(AppLabel)
 	}
 
@@ -122,6 +128,10 @@ func main() {
 			iniFiles = append(iniFiles, file)
 		case ".JSON":
 			jsonFiles = append(jsonFiles, file)
+		case ".TOML":
+			tomlFiles = append(tomlFiles, file)
+		case ".YAML":
+			yamlFiles = append(yamlFiles, file)
 		default:
 			fmt.Errorf("Unknown data file type: %q", ext)
 		}
@@ -137,16 +147,24 @@ func main() {
 	for _, file := range cli.DataJSON {
 		jsonFiles = append(jsonFiles, file)
 	}
+	for _, file := range cli.DataTOML {
+		tomlFiles = append(tomlFiles, file)
+	}
+	for _, file := range cli.DataYAML {
+		yamlFiles = append(yamlFiles, file)
+	}
 
 	// templar.Data.Template = cli.Template
 	checkDotEnv := !cli.NoDotenv
 
 	// fmt.Printf("templar.main() | cli.Template = %q\n", cli.Template)
 	// fmt.Printf("templar.main() | templar.Data = %#v\n", templar.Data)
-	if cli.Debug {
+	if cli.Debug > templar.DebugOff {
 		fmt.Fprintf(os.Stderr, "templar.main() |    envFiles = %#v\n", envFiles)
 		fmt.Fprintf(os.Stderr, "templar.main() |    iniFiles = %#v\n", iniFiles)
 		fmt.Fprintf(os.Stderr, "templar.main() |   jsonFiles = %#v\n", jsonFiles)
+		fmt.Fprintf(os.Stderr, "templar.main() |   tomlFiles = %#v\n", tomlFiles)
+		fmt.Fprintf(os.Stderr, "templar.main() |   yamlFiles = %#v\n", yamlFiles)
 		fmt.Fprintf(os.Stderr, "templar.main() |    template = %q\n", cli.Template)
 		fmt.Fprintf(os.Stderr, "templar.main() | checkDotEnv = %t\n", checkDotEnv)
 	}
@@ -167,6 +185,18 @@ func main() {
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "JSON File Parsing Error: %s\n", err.Error())
 		os.Exit(ErrorJSONParsing)
+	}
+
+	err = templar.InitData(checkDotEnv, tomlFiles...)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "TOML File Parsing Error: %s\n", err.Error())
+		os.Exit(ErrorTOMLParsing)
+	}
+
+	err = templar.InitData(checkDotEnv, yamlFiles...)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "YAML File Parsing Error: %s\n", err.Error())
+		os.Exit(ErrorYAMLParsing)
 	}
 
 	if len(cli.OutputFile) > 0 {

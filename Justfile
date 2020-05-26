@@ -87,6 +87,13 @@ run +args="":
 	just _term-wipe
 	just test-{{cmd}} "{{data}}"
 
+# Run Go Unit Tests
+@test-coverage +data='':
+	just _term-wipe
+	echo "You need to run:"
+	echo "go test -coverprofile=c.out"
+	echo "go tool cover -func=c.out"
+
 # Test with debug enabled
 test-debug +data="example.env":
 	@# CLI_ENV_VAR="Sound and fury" go run cmd/templar/main.go example.tmpl --data-file example.env CLI_VAR="As you like it" --debug
