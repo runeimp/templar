@@ -1,6 +1,12 @@
 Templar ChangeLog
 =================
 
+v0.2.1
+------
+
+Updated the version of the CLI tool in the ReadMe
+
+
 v0.2.0
 ------
 

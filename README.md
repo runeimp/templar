@@ -1,8 +1,8 @@
 Templar
 =======
 
-Templar Command Line Tool v2.0.0  
-Templar Library v0.2.0
+Templar Command Line Tool v2.1.0  
+Templar Library v0.2.1
 
 Command line templating system written in Go. Though the initial idea was written in BASH. And that was cool; but that version had serious limitations as well. Go to the rescue!
 
