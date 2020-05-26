@@ -4,6 +4,8 @@
 #
 
 alias ver := version
+# set load-dotenv := false # Not supported yet
+# load-dotenv := false
 
 # Like in make the first recipe is used by default.
 # I like listing all the recipes by default.
@@ -44,11 +46,14 @@ _dir-list:
 # Distribution Helper
 @dist sub="release":
 	just dist-{{sub}}
+
 # Distribution Releaser
 dist-release:
 	#!/bin/sh
 	just _term-wipe
 	just _clean
+	git checkout master
+	git push --all && git push --tags
 	goreleaser
 	# goreleaser release --skip-publish
 	ver="$(git tag | tail -1)"
@@ -61,6 +66,7 @@ dist-release:
 		cd dist
 		mv *.{deb,gz,md,rpm,txt,yaml,zip} ../distro/templar_${ver}/
 	fi
+	git checkout develop
 
 # Distribution Tester
 dist-test:
@@ -72,12 +78,21 @@ dist-test:
 
 # Run the command line app
 run +args="":
+	just _term-wipe
+	# NOTE: Just itself ALWAYS loads a .env file if present
 	go run cmd/templar/main.go {{args}}
 
 # Run a test
 @test cmd="help" +data="example.env":
 	just _term-wipe
 	just test-{{cmd}} "{{data}}"
+
+# Run Go Unit Tests
+@test-coverage +data='':
+	just _term-wipe
+	echo "You need to run:"
+	echo "go test -coverprofile=c.out"
+	echo "go tool cover -func=c.out"
 
 # Test with debug enabled
 test-debug +data="example.env":

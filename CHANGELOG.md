@@ -1,6 +1,14 @@
 Templar ChangeLog
 =================
 
+v0.2.0
+------
+
+Added `Debug` attribute
+Added TOML and YAML support
+Temporarily switched to `github.com/runeimp/gotenv` from `github.com/subosito/gotenv`
+
+
 v0.1.1
 ------
 
